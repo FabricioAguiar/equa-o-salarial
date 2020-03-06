@@ -1,1 +1,1 @@
-# equa-o-salarial
+# equação salarial
