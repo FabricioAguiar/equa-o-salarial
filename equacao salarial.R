@@ -58,7 +58,7 @@ pdad_2018<-left_join(pdad_dom_2018,
   dplyr::ungroup() %>% 
   #  # Criar variáveis para análise
   dplyr::mutate(
-    # Criar um código de identificação da RA
+    # Criar um código de identificação das RAs
     ra=factor(case_when(A01ra==1~"Plano Piloto",
                         A01ra==2~"Gama",
                         A01ra==3~"Taguatinga",
@@ -105,8 +105,8 @@ pdad_2018<-left_join(pdad_dom_2018,
                      TRUE~0),
 
     # Criar variável para deficiencia(visual, auditiva,motora ou mental)
-        deficiente=case_when(E06==4& E07==4 & E08==4 & E09==3~0,
-                         TRUE~1),
+        deficiente=case_when(E06 %in% c(2,3) & E07%in% c(2,3) & E08%in% c(2,3) & E09%in% c(1,2)~1,
+                         TRUE~0),
     # Criar variável para tempo gasto com afazeres domésticos
         afazer=case_when(G18==88888~NA_real_,
                      TRUE~G18),
@@ -415,7 +415,7 @@ summary(reg_sal)
 descritivas0 <- svy2018 %>% 
   srvyr::filter(!(renda_trab==0&trabalha==1),idade_calculada>=14) %>% 
   srvyr::group_by(trabalha) %>% 
-  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,filho,renda_dom_sp,negro,deficiente,
+  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,deficiente,
                            estuda),
                       list(~ srvyr::survey_mean(.,na.rm=T))) %>% 
   tidyr::gather("VAR","valor",-1) %>% 
@@ -444,7 +444,7 @@ descritivas_ep <- descritivas0 %>%
 descritivas0 <- svy2018 %>% 
   srvyr::filter(!(renda_trab==0&trabalha==1),idade_calculada>=14) %>% 
   srvyr::group_by(trabalha) %>% 
-  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,filho,renda_dom_sp,negro,deficiente,
+  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,deficiente,
                            estuda),
                    list(~ srvyr::survey_mean(.,na.rm=T))) %>% 
   tidyr::gather("VAR","valor",-1) %>% 
@@ -472,7 +472,7 @@ descritivas <- descritivas0 %>%
   dplyr::mutate(VAR=case_when(VAR=="idade_calculada"~"Idade (média)",
                               VAR=="ensino_medio"~"Ensino médio (%)",
                               VAR=="estuda"~"Estudante (%)",
-                              VAR=="filho"~"Nº de filhos (média)",
+                              VAR=="sit_pat_mat"~"Tem filho (%)",
                               VAR=="mulher"~"Pessoas do sexo feminino (%)",
                               VAR=="negro"~"Negro (%)",
                               VAR=="renda_dom_sp"~"Renda domiciliar (sem a renda da pessoa) (Média)",
@@ -481,14 +481,14 @@ descritivas <- descritivas0 %>%
                               VAR=="trabalha_pp"~"Trabalha no Plano Piloto (%)",
                               VAR=="setor_publico"~"Trabalha no setor público (%)",
                               VAR=="deficiente"~"Pessoas com alguma deficiência (%)",
-                              VAR=="tempo"~"Tempo no emprego principal (%)",
+                              VAR=="tempo"~"Tempo no emprego principal (média)",
                               VAR=="renda_trab"~"Renda do trabalho (média)")) %>% 
   dplyr::bind_cols(descritivas_ep %>% 
                      dplyr::select(-1)) %>% 
   dplyr::mutate_at(vars(2:5),
                    list(~case_when(VAR %in% c("Ensino médio (%)","Estudante (%)","Pessoas do sexo feminino (%)",
                                               "Negro (%)","Ensino superior (%)","Trabalha no setor informal (%)",
-                                              "Tempo no emprego principal (%)","Pessoas com alguma deficiência (%)",
+                                              "Pessoas com alguma deficiência (%)","Tem filho (%)",
                                               "Trabalha no Plano Piloto (%)","Trabalha no setor público (%)")~.*100,
                                    TRUE~.)))
 
