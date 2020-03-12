@@ -492,3 +492,20 @@ descritivas <- descritivas0 %>%
                                               "Trabalha no Plano Piloto (%)","Trabalha no setor público (%)")~.*100,
                                    TRUE~.)))
 
+
+salarios<-broom::tidy(reg_sal) %>% 
+  mutate(estimate=exp(estimate))
+
+ocupacao<-broom::tidy(reg_ocup) %>% 
+  mutate(estimate=exp(estimate))
+
+options(scipen = 999)
+
+write.table(descritivas,"descritivas.csv",
+            row.names = F, sep = ";", dec = ',')
+
+write.table(salarios,"regressao_salarios.csv",
+            row.names = F, sep = ";", dec = ',')
+
+write.table(ocupacao,"regressao_ocupacao.csv",
+            row.names = F, sep = ";", dec = ',')
