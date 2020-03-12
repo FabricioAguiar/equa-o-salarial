@@ -105,7 +105,7 @@ pdad_2018<-left_join(pdad_dom_2018,
                      TRUE~0),
 
     # Criar variável para deficiencia(visual, auditiva,motora ou mental)
-        deficiente=case_when(E06 %in% c(2,3) & E07%in% c(2,3) & E08%in% c(2,3) & E09%in% c(1,2)~1,
+        deficiente=case_when(E06 %in% c(2,3) | E07%in% c(2,3) | E08%in% c(2,3) | E09%in% c(1,2)~1,
                          TRUE~0),
     # Criar variável para tempo gasto com afazeres domésticos
         afazer=case_when(G18==88888~NA_real_,
