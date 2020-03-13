@@ -105,7 +105,7 @@ pdad_2018<-left_join(pdad_dom_2018,
                      TRUE~0),
 
     # Criar variável para deficiencia(visual, auditiva,motora ou mental)
-        deficiente=case_when(E06 %in% c(2,3) | E07%in% c(2,3) | E08%in% c(2,3) | E09%in% c(1,2)~1,
+        port_de_defic=case_when(E06 %in% c(2,3) | E07%in% c(2,3) | E08%in% c(2,3) | E09%in% c(1,2)~1,
                          TRUE~0),
     # Criar variável para tempo gasto com afazeres domésticos
         afazer=case_when(G18==88888~NA_real_,
@@ -250,7 +250,7 @@ pdad_2018<-left_join(pdad_dom_2018,
     # Retirar G05 é para evitar inconsistências na equação de salários
     # e descritivas
     setor_publico=case_when(G13==2~1,
-                            G08 %in% c(10,11,16)~NA_real_,
+                            G08 %in% c(10,11,16)~1,
                             TRUE~0),
     #DUVIDA######
     # Criar variável para setor informal (empregado sem carteira, autônomo e ajuda no negocio familiar)
@@ -350,18 +350,18 @@ reg_ocup <- survey::svyglm(trabalha~idade_calculada+
                              negro+
                              grupo_ped+
                              afazer+
-                             deficiente+
+                             port_de_defic+
                              estuda,
                            subset(svy2018,idade_calculada>=14), 
                            family=binomial(link = "probit"))
 # Verificar os resultados
 summary(reg_ocup)
 
-# Calcular a inversa de mills
+  # Calcular a inversa de mills
 imr <- pdad_2018 %>% 
   dplyr::filter(idade_calculada>=14) %>% 
   dplyr::select(E01,trabalha,idade_calculada,superior,ensino_medio,grupo_ped,
-                mulher,sit_pat_mat,casado,renda_dom_sp,negro,estuda,deficiente,afazer) %>% 
+                mulher,sit_pat_mat,casado,renda_dom_sp,negro,estuda,port_de_defic,afazer) %>% 
   na.omit %>% 
   dplyr::mutate(IMR=invMillsRatio(reg_ocup)$IMR1) %>% 
   dplyr::select(E01,IMR)
@@ -402,7 +402,7 @@ reg_sal <- survey::svyglm(log_renda_trab~
                             tempo+
                             trabalha_pp+
                             IMR+
-                            deficiente+
+                            port_de_defic+
                             #afazer+
                             mulher,
                           subset(svy2018,idade_calculada>=14))
@@ -410,12 +410,11 @@ reg_sal <- survey::svyglm(log_renda_trab~
 summary(reg_sal)
 
 
-
 # Tirar as estatísticas descritiva comum a todos
 descritivas0 <- svy2018 %>% 
   srvyr::filter(!(renda_trab==0&trabalha==1),idade_calculada>=14) %>% 
   srvyr::group_by(trabalha) %>% 
-  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,deficiente,
+  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,port_de_defic,
                            estuda),
                       list(~ srvyr::survey_mean(.,na.rm=T))) %>% 
   tidyr::gather("VAR","valor",-1) %>% 
@@ -444,7 +443,7 @@ descritivas_ep <- descritivas0 %>%
 descritivas0 <- svy2018 %>% 
   srvyr::filter(!(renda_trab==0&trabalha==1),idade_calculada>=14) %>% 
   srvyr::group_by(trabalha) %>% 
-  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,deficiente,
+  srvyr::summarise_at(vars(idade_calculada,superior,ensino_medio,mulher,sit_pat_mat,renda_dom_sp,negro,port_de_defic,
                            estuda),
                    list(~ srvyr::survey_mean(.,na.rm=T))) %>% 
   tidyr::gather("VAR","valor",-1) %>% 
@@ -480,7 +479,7 @@ descritivas <- descritivas0 %>%
                               VAR=="informal"~"Trabalha no setor informal (%)",
                               VAR=="trabalha_pp"~"Trabalha no Plano Piloto (%)",
                               VAR=="setor_publico"~"Trabalha no setor público (%)",
-                              VAR=="deficiente"~"Pessoas com alguma deficiência (%)",
+                              VAR=="port_de_defic"~"Pessoas com alguma deficiência (%)",
                               VAR=="tempo"~"Tempo no emprego principal (média)",
                               VAR=="renda_trab"~"Renda do trabalho (média)")) %>% 
   dplyr::bind_cols(descritivas_ep %>% 
@@ -488,7 +487,7 @@ descritivas <- descritivas0 %>%
   dplyr::mutate_at(vars(2:5),
                    list(~case_when(VAR %in% c("Ensino médio (%)","Estudante (%)","Pessoas do sexo feminino (%)",
                                               "Negro (%)","Ensino superior (%)","Trabalha no setor informal (%)",
-                                              "Pessoas com alguma deficiência (%)","Tem filho (%)",
+                                              "Portador de alguma deficiência (%)","Tem filho (%)",
                                               "Trabalha no Plano Piloto (%)","Trabalha no setor público (%)")~.*100,
                                    TRUE~.)))
 
