@@ -15,8 +15,8 @@ library(dplyr)
 
 # Abrir conexão com o banco de dados
 db<- DBI::dbConnect(odbc::odbc(),"db_codeplan",
-                    uid=("104409"),
-                    pwd=("u5rcdp1l4n"))
+                    uid=Sys.getenv("matricula"),
+                    pwd=Sys.getenv("senha"))
 
 # Baixar base de moradores
 pdad_mor_2018 <- DBI::dbGetQuery(db,"select * from pdad2018.moradores_final_pesos_imputada") 
@@ -269,8 +269,8 @@ pdad_2018<-left_join(pdad_dom_2018,
                          TRUE~as.numeric(G16*infladefla/hora_trab)),
     
     # Criar variável com o log da renda do trabalho
-    log_renda_trab=case_when(renda_trab==0~log((renda_trab*infladefla)+1),
-                             TRUE~log(renda_trab*infladefla)),
+    log_renda_trab=case_when(renda_trab==0~log(renda_trab+0.1),
+                             TRUE~log(renda_trab)),
     
     # Renda domicliar sem a renda da pessoa
     renda_individual=ifelse(G16 %in% c(77777,88888),NA,ifelse(G16==99999,0,G16))+
@@ -339,7 +339,8 @@ svy2018 <- srvyr::as_survey(svy2018)
 options(survey.lonely.psu = "adjust")
 
 # Calcular o primeiro estágio
-reg_ocup <- survey::svyglm(trabalha~idade_calculada+
+reg_ocup <- survey::svyglm(trabalha~
+                             idade_calculada+
                              I(idade_calculada^2)+
                              superior+
                              ensino_medio+
@@ -394,7 +395,6 @@ reg_sal <- survey::svyglm(log_renda_trab~
                             I(idade_calculada^2)+
                             superior+
                             ensino_medio+
-                            #sit_pat_mat+
                             negro+
                             estuda+
                             informal+
@@ -492,11 +492,9 @@ descritivas <- descritivas0 %>%
                                    TRUE~.)))
 
 
-salarios<-broom::tidy(reg_sal) %>% 
-  mutate(estimate=exp(estimate))
+salarios<-broom::tidy(reg_sal) 
 
-ocupacao<-broom::tidy(reg_ocup) %>% 
-  mutate(estimate=exp(estimate))
+ocupacao<-broom::tidy(reg_ocup) 
 
 options(scipen = 999)
 
