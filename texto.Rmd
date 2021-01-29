@@ -1,0 +1,160 @@
+---
+date: "`r Sys.Date()`"
+output:
+    pdf_document:
+      fig_caption: yes
+      latex_engine: lualatex
+      fig_height: 8
+      fig_width: 12
+      includes:
+        after_body: capa/fim.tex
+        before_body: capa/capa.tex
+      number_sections: yes
+      toc: yes
+      keep_tex:  false
+documentclass: article
+classoption: a4paper
+header-includes:
+- \usepackage{pdflscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+- \setlength\parindent{24pt}
+- \usepackage{indentfirst}
+- \usepackage[brazilian]{babel}
+- \usepackage[utf8]{inputenc}
+- \usepackage{setspace}
+- \onehalfspace
+- \usepackage[bottom,hang]{footmisc}
+- \setlength{\footnotemargin}{1em}
+- \usepackage{color}
+- \usepackage{graphicx}
+- \usepackage{microtype}
+- \usepackage{enumitem}
+- \newtheorem{definition}{Definição}
+- \usepackage{pdfpages}
+- \usepackage{fancyhdr}
+- \renewcommand{\footrulewidth}{0.4pt}
+- \usepackage{floatrow}
+- \usepackage{amsmath}
+#- \usepackage{float}
+- \usepackage{morefloats}
+- \usepackage{pbox}
+- \usepackage{graphicx}
+- \usepackage{xcolor, grffile}
+- \usepackage{color, colortbl}
+- \usepackage{tikz}
+- \usepackage{booktabs}
+- \usepackage{tabularx}
+- \floatplacement{figure}{H}
+- \floatsetup[figure]{capposition=top}
+- \floatsetup[table]{capposition=top}
+#- \usepackage{longtable}
+- \usepackage[bf]{caption}
+- \captionsetup{justification=raggedright,singlelinecheck=false}
+- \usepackage{placeins}
+- \usepackage{tocloft}
+- \usepackage{rotating}
+- \setlength{\cfttabnumwidth}{3em}
+- \setlength{\cftfignumwidth}{3em}
+- \usepackage{chngcntr}
+- \counterwithin{figure}{section}
+- \counterwithin{table}{section}
+- \pagenumbering{gobble}
+- \usepackage[hyphenbreaks]{breakurl}
+- \usepackage[hyphenbreaks]{breakurl}
+- \PassOptionsToPackage{hyphens}{url}
+- \usepackage{rotating}
+- \maxdeadcycles=2000
+- \usepackage{tabu}
+mainfont: Arial
+fontsize: 12pt
+#bibliography: Zotero.bib
+dpi: 150
+---
+
+
+\newpage
+
+\listoffigures
+
+\newpage
+
+\listoftables
+
+
+\newpage
+\pagenumbering{arabic}
+
+\fancyhead[L]{}
+
+\fancyhead[C]{}
+
+\fancyhead[R]{Salario feminino no Distrito Federal segundo a PDAD 2018}
+
+\fancyfoot[R]{\textbf{\thepage}}
+
+
+\fancyfoot[L]{Nota Técnica\hspace{7pt}|\hspace{7pt}Dieps -- Codeplan\hspace{7pt}|\hspace{7pt}`r tools::toTitleCase(as.character(lubridate::month(Sys.Date(),label=T,abbr=F)))`\hspace{7pt}|\hspace{7pt}`r lubridate::year(Sys.Date())`}
+
+\fancyfoot[C]{}
+
+\pagestyle{fancy}
+
+```{r tratamento_inicial, include=FALSE}
+# Carregar pacotes
+library(knitr)
+
+set.seed(8888)
+
+load("resultados/resultados.rda")
+
+# Configurar chunks
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                      dpi = 150, dev = 'png',fig.pos = 'H',
+                      cache=F)
+
+# Carregar tema para os gráficos
+# ggthemr::ggthemr('fresh',type="outer")
+
+CV <- 0.25
+
+# Definir função para separador de milhar e decimal dos chunks
+knit_hooks$set(inline = function(x) {
+  prettyNum(x, big.mark=".",decimal.mark = ",")
+})
+
+# Evitar confito de pacote com o kable
+options(kableExtra.latex.load_packages = FALSE)
+options(scipen = 999)
+library(kableExtra)
+```
+
+# Introdução
+
+# Metodologia
+
+# Base de dados 
+
+
+# Resultados
+
+A Tabela \ref{tab:reg.ocup} apresenta os resultados da equação de seleção.
+
+```{r reg.ocup}
+ocupacao %>% 
+  knitr::kable("latex",
+               linesep="",
+               booktabs = T,
+               digits = 3,
+               caption = "Equação de seleção - resultados do Probit para situação ocupacional") %>%
+  kableExtra::kable_styling(latex_options = c("HOLD_position","scale_down"),
+                            full_width = T) %>%
+  kableExtra::column_spec(1,width = "5cm") %>% 
+  kableExtra::footnote(
+    general="Fonte: PDAD 2018",
+    general_title = "",
+    fixed_small_size = T)
+```
+
+
+# Conclusões

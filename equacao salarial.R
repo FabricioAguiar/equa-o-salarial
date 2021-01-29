@@ -498,11 +498,14 @@ ocupacao<-broom::tidy(reg_ocup)
 
 options(scipen = 999)
 
-write.table(descritivas,"descritivas.csv",
-            row.names = F, sep = ";", dec = ',')
+# write.table(descritivas,"resultados/descritivas.csv",
+#             row.names = F, sep = ";", dec = ',')
+# 
+# write.table(salarios,"resultados/regressao_salarios.csv",
+#             row.names = F, sep = ";", dec = ',')
+# 
+# write.table(ocupacao,"resultados/regressao_ocupacao.csv",
+#             row.names = F, sep = ";", dec = ',')
 
-write.table(salarios,"regressao_salarios.csv",
-            row.names = F, sep = ";", dec = ',')
-
-write.table(ocupacao,"regressao_ocupacao.csv",
-            row.names = F, sep = ";", dec = ',')
+save(list=c("salarios","ocupacao"),
+     file="resultados/resultados.rda")
